@@ -41,12 +41,16 @@
 
   * { box-sizing: border-box; }
 
-  html, body { height: 100%; }
+  html { height: 100%; }
 
   body {
+    /* min-height, not height: on short viewports the body must grow with its
+       content so the bottom padding stays inside the scrollable area. */
+    min-height: 100%;
     margin: 0;
     padding: 24px 16px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background: var(--bg);
@@ -59,6 +63,10 @@
   }
 
   .card {
+    /* Auto block margins absorb the free space, so the card sits centred in
+       whatever room is left above the footer, and the footer sits at the
+       bottom of the viewport. Both collapse to 0 once content fills it. */
+    margin-block: auto;
     width: 100%;
     max-width: 460px;
     background: var(--card);
@@ -153,7 +161,7 @@
     align-items: center;
     justify-content: center;
     gap: 4px 8px;
-    margin-top: 16px;
+    padding-top: 24px;
     color: var(--muted);
     font-size: 0.75rem;
   }
@@ -214,14 +222,15 @@
       <p class="muted">הדף הזה בונה את הקישורים בדפדפן. יש להפעיל JavaScript.</p>
     </noscript>
   </div>
-  <footer class="credit">
-    <span>עיצוב ופיתוח:</span>
-    <a class="shiny" href="https://shinypages.com" target="_blank" rel="noopener"
-       aria-label="Shiny Pages — עיצוב ופיתוח אתרים">
-      <span class="shiny__mark"></span>
-    </a>
-  </footer>
 </main>
+
+<footer class="credit">
+  <span>עיצוב ופיתוח:</span>
+  <a class="shiny" href="https://shinypages.com" target="_blank" rel="noopener"
+     aria-label="Shiny Pages — עיצוב ופיתוח אתרים">
+    <span class="shiny__mark"></span>
+  </a>
+</footer>
 
 <script>
 (function () {
