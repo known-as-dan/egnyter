@@ -18,3 +18,12 @@ same result, with the rest of the URL preserved byte-for-byte.
 ```
 =HYPERLINK("https://known-as-dan.github.io/egnyter/?u=" & ENCODEURL(Y2), "📁")
 ```
+
+---
+
+עיצוב ופיתוח: [Shiny Pages](https://shinypages.com) — דן סביצ׳קה
+
+Built by Dan Svichka / [Shiny Pages](https://shinypages.com). The page carries the same
+watermark treatment as [meshekalexander.com](https://meshekalexander.com) and Mikumit:
+both logo lockups (navy for light, white for dark) are inlined as WebP data URIs so the
+page stays a single self-contained file with zero network requests.
