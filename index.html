@@ -79,13 +79,20 @@
     margin: 0 0 4px;
     font-size: 1.15rem;
     font-weight: 600;
+    text-align: center;
   }
 
   p { margin: 0 0 16px; }
 
+  /* The heading block is centred to match the buttons and the footer credit;
+     the note and the URL keep their natural alignment, since centring
+     multi-line body copy hurts readability. */
+  .center { text-align: center; }
+
   .muted {
     color: var(--muted);
     font-size: 0.875rem;
+    text-align: center;
   }
 
   .url {
@@ -269,7 +276,7 @@
   function renderError() {
     card.className = "card error";
     content.appendChild(el("h1", null, "קישור לא תקין"));
-    content.appendChild(el("p", null, "לא התקבלה כתובת Egnyte תקינה."));
+    content.appendChild(el("p", "center", "לא התקבלה כתובת Egnyte תקינה."));
     content.appendChild(el("p", "muted", "המבנה הצפוי:"));
     content.appendChild(el("code", "url", location.origin + location.pathname +
       "?u=https://<domain>.egnyte.com/navigate/folder/<id>"));
