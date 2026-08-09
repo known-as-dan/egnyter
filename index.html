@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>פתיחה ב־Egnyte</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --border: #d9dce1;
+    --text: #1c1f23;
+    --muted: #5c636d;
+    --accent: #0b5cd5;
+    --accent-text: #ffffff;
+    --code-bg: #f0f2f5;
+    --error: #a4262c;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171a;
+      --card: #1d2125;
+      --border: #333a41;
+      --text: #e8eaed;
+      --muted: #a3abb5;
+      --accent: #4c8dfa;
+      --accent-text: #0b1220;
+      --code-bg: #14181c;
+      --error: #f28b82;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Hebrew",
+                 "Arial Hebrew", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  p { margin: 0 0 16px; }
+
+  .muted {
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  .url {
+    display: block;
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: isolate;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 0 0 20px;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    user-select: all;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .btn {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+    background: transparent;
+    transition: filter 0.12s ease, background-color 0.12s ease;
+  }
+
+  .btn:hover { background: var(--code-bg); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  .btn-primary:hover { filter: brightness(1.08); background: var(--accent); }
+
+  .btn:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .note {
+    margin: 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+
+  .error h1 { color: var(--error); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="card" id="card" aria-live="polite">
+  <noscript>
+    <h1>נדרש JavaScript</h1>
+    <p class="muted">הדף הזה בונה את הקישורים בדפדפן. יש להפעיל JavaScript.</p>
+  </noscript>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var PATTERN = /^(https?|egnyte):\/\/[a-z0-9-]+\.egnyte\.com\/[^\s]*$/;
+
+  var card = document.getElementById("card");
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function renderError() {
+    card.className = "card error";
+    card.appendChild(el("h1", null, "קישור לא תקין"));
+    card.appendChild(el("p", null, "לא התקבלה כתובת Egnyte תקינה."));
+    card.appendChild(el("p", "muted", "המבנה הצפוי:"));
+    card.appendChild(el("code", "url", location.origin + location.pathname +
+      "?u=https://<domain>.egnyte.com/navigate/folder/<id>"));
+    card.appendChild(el("p", "note", "יש לוודא שהערך של הפרמטר u מקודד (ENCODEURL) ומצביע לדומיין egnyte.com."));
+  }
+
+  function render(appUrl, webUrl) {
+    card.appendChild(el("h1", null, "פתיחת תיקייה ב־Egnyte"));
+    card.appendChild(el("p", "muted", "בחר/י כיצד לפתוח את הקישור:"));
+
+    var code = el("code", "url", webUrl);
+    card.appendChild(code);
+
+    var actions = el("div", "actions");
+
+    var app = el("a", "btn btn-primary", "פתיחה באפליקציית Egnyte");
+    app.setAttribute("href", appUrl);
+    actions.appendChild(app);
+
+    var web = el("a", "btn", "פתיחה בדפדפן");
+    web.setAttribute("href", webUrl);
+    web.setAttribute("target", "_blank");
+    web.setAttribute("rel", "noopener");
+    actions.appendChild(web);
+
+    card.appendChild(actions);
+
+    card.appendChild(el("p", "note",
+      "פתיחה באפליקציה דורשת שאפליקציית Egnyte Desktop App מותקנת ושמוגדר בה כונן שמכסה את הנתיב הזה."));
+
+    app.focus();
+  }
+
+  var raw;
+  try {
+    raw = new URLSearchParams(location.search).get("u");
+  } catch (e) {
+    raw = null;
+  }
+
+  var value = (raw || "").trim();
+
+  if (!value || !PATTERN.test(value)) {
+    renderError();
+    return;
+  }
+
+  var rest = value.slice(value.indexOf("://") + 3);
+  render("egnyte://" + rest, "https://" + rest);
+})();
+</script>
+</body>
+</html>
