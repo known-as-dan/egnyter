@@ -8,6 +8,11 @@ HTML file with inline CSS/JS, and the link is built client-side from the query s
 
 **URL format:** `https://known-as-dan.github.io/egnyter/?u=<url-encoded Egnyte URL>`
 
+Open `https://known-as-dan.github.io/egnyter/` without a query string to paste an
+Egnyte URL and generate a shareable handoff link. The generator includes copy and
+preview buttons and accepts both web and `egnyte://` links. Existing `?u=` links
+continue to show the desktop/browser choices. Link generation stays in the browser.
+
 The `u` parameter must match `^(https?|egnyte)://[a-z0-9-]+\.egnyte\.com/[^\s]*$` — anything
 else renders an error and no links at all (the page is public, so this guard is what keeps it
 from being an open redirect). Either scheme works: `https://…` and `egnyte://…` produce the
