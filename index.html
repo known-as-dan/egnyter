@@ -403,11 +403,57 @@
 
     var web = el("a", "btn", "פתיחה בדפדפן");
     web.setAttribute("href", webUrl);
-    web.setAttribute("target", "_blank");
-    web.setAttribute("rel", "noopener");
     actions.appendChild(web);
 
     content.appendChild(actions);
+
+    var status = el("p", "muted");
+    status.hidden = true;
+    status.setAttribute("role", "status");
+    content.appendChild(status);
+
+    var closePending = false;
+    var closeTimer;
+    var waitingForFocus = false;
+
+    function cancelClose() {
+      closePending = false;
+      window.clearTimeout(closeTimer);
+    }
+
+    function tryClose() {
+      if (!closePending || waitingForFocus || !document.hasFocus()) return;
+      cancelClose();
+      window.close();
+      // Some browsers refuse to close tabs opened through browser UI. Keep
+      // both choices available and avoid claiming that the app opened.
+      status.textContent = "אפשר לסגור את הלשונית הזו. אם התיקייה לא נפתחה, אפשר לנסות שוב או לפתוח בדפדפן.";
+    }
+
+    app.addEventListener("click", function (event) {
+      if (event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
+          event.metaKey || event.shiftKey || event.altKey) return;
+      cancelClose();
+      closePending = true;
+      waitingForFocus = false;
+      status.hidden = false;
+      status.textContent = "נשלחה בקשה לפתיחה באפליקציה…";
+      // Leave the anchor's native protocol navigation intact. Give the browser
+      // time to hand off, and wait for focus to return if a launch prompt or
+      // the desktop app takes focus. Focus does not prove a successful launch.
+      closeTimer = window.setTimeout(tryClose, 1500);
+    });
+    window.addEventListener("blur", function () {
+      if (closePending) waitingForFocus = true;
+    });
+    window.addEventListener("focus", function () {
+      if (!closePending) return;
+      waitingForFocus = false;
+      window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(tryClose, 300);
+    });
+    web.addEventListener("click", cancelClose);
+    window.addEventListener("pagehide", cancelClose);
 
     content.appendChild(el("p", "note",
       "פתיחה באפליקציה דורשת שאפליקציית Egnyte Desktop App מותקנת ושמוגדר בה כונן שמכסה את הנתיב הזה."));
