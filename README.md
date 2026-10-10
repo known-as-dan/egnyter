@@ -13,6 +13,14 @@ Egnyte URL and generate a shareable handoff link. The generator includes copy an
 preview buttons and accepts both web and `egnyte://` links. Existing `?u=` links
 continue to show the desktop/browser choices. Link generation stays in the browser.
 
+**After choosing a destination:** the browser option opens Egnyte in the current
+tab, so it replaces the chooser. The desktop option keeps the native `egnyte://`
+handoff and then attempts to close the chooser tab. If the launch prompt or app
+takes focus, the close attempt waits until focus returns. Browsers may refuse
+to close tabs depending on how they were opened; in that case, the chooser stays
+available with a note that it can be closed manually. The page cannot confirm
+that the desktop app successfully opened the folder.
+
 The `u` parameter must match `^(https?|egnyte)://[a-z0-9-]+\.egnyte\.com/[^\s]*$` — anything
 else renders an error and no links at all (the page is public, so this guard is what keeps it
 from being an open redirect). Either scheme works: `https://…` and `egnyte://…` produce the
