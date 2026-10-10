@@ -147,7 +147,7 @@
 
   .btn-primary:hover { filter: brightness(1.08); background: var(--accent); }
 
-  .btn:focus-visible, .link-input:focus-visible {
+  .btn:focus-visible, .link-input:focus-visible, .close-preference input:focus-visible {
     outline: 3px solid var(--accent);
     outline-offset: 2px;
   }
@@ -169,6 +169,15 @@
   .result { margin-top: 20px; }
   .result .url { margin-bottom: 10px; }
   .copy-status { margin: 10px 0 0; }
+  .close-preference {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+  .close-preference input { margin: 0.25em 0 0; accent-color: var(--accent); }
+  .close-preference-note { margin: 0 0 16px; color: var(--muted); font-size: 0.75rem; }
   [hidden] { display: none !important; }
 
   /* Egnyte wordmark standing in for the word "Egnyte" in the heading. Its
@@ -407,6 +416,22 @@
 
     content.appendChild(actions);
 
+    var preferenceKey = "egnyter.alwaysAllowConfirmed";
+    var preference = el("label", "close-preference");
+    var alwaysAllowed = el("input");
+    alwaysAllowed.type = "checkbox";
+    alwaysAllowed.setAttribute("aria-describedby", "close-preference-note");
+    try {
+      alwaysAllowed.checked = localStorage.getItem(preferenceKey) === "true";
+    } catch (e) {
+      // The current choice still works when browser storage is unavailable.
+    }
+    preference.append(alwaysAllowed, document.createTextNode("כבר הפעלתי ״אפשר תמיד״ לפתיחת Egnyte בדפדפן"));
+    var preferenceNote = el("p", "close-preference-note",
+      "כשמסומן, ננסה לסגור את הלשונית בלי להמתין לחזרה לדפדפן. הבחירה נשמרת בדפדפן הזה.");
+    preferenceNote.id = "close-preference-note";
+    content.append(preference, preferenceNote);
+
     var status = el("p", "muted");
     status.hidden = true;
     status.setAttribute("role", "status");
@@ -422,13 +447,27 @@
     }
 
     function tryClose() {
-      if (!closePending || waitingForFocus || !document.hasFocus()) return;
+      if (!closePending) return;
+      if (!alwaysAllowed.checked && (waitingForFocus || !document.hasFocus())) return;
       cancelClose();
       window.close();
       // Some browsers refuse to close tabs opened through browser UI. Keep
       // both choices available and avoid claiming that the app opened.
       status.textContent = "אפשר לסגור את הלשונית הזו. אם התיקייה לא נפתחה, אפשר לנסות שוב או לפתוח בדפדפן.";
     }
+
+    alwaysAllowed.addEventListener("change", function () {
+      try {
+        localStorage.setItem(preferenceKey, alwaysAllowed.checked ? "true" : "false");
+      } catch (e) {
+        preferenceNote.textContent = "הבחירה תקפה ללשונית הזו בלבד; הדפדפן לא מאפשר לשמור אותה.";
+      }
+      waitingForFocus = !document.hasFocus();
+      if (closePending) {
+        window.clearTimeout(closeTimer);
+        closeTimer = window.setTimeout(tryClose, 1500);
+      }
+    });
 
     app.addEventListener("click", function (event) {
       if (event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
@@ -439,15 +478,16 @@
       status.hidden = false;
       status.textContent = "נשלחה בקשה לפתיחה באפליקציה…";
       // Leave the anchor's native protocol navigation intact. Give the browser
-      // time to hand off, and wait for focus to return if a launch prompt or
-      // the desktop app takes focus. Focus does not prove a successful launch.
+      // time to hand off. Unless the user confirmed "Always allow", wait for
+      // focus to return. This preference does not change browser permissions
+      // or prove a successful launch.
       closeTimer = window.setTimeout(tryClose, 1500);
     });
     window.addEventListener("blur", function () {
       if (closePending) waitingForFocus = true;
     });
     window.addEventListener("focus", function () {
-      if (!closePending) return;
+      if (!closePending || alwaysAllowed.checked) return;
       waitingForFocus = false;
       window.clearTimeout(closeTimer);
       closeTimer = window.setTimeout(tryClose, 300);
